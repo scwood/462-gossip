@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "start": "nodemon --ignore db.json --ignore sessions/ --exec 'node --harmony' server/index.js & npm run client",
+    "server": "node --harmony server/index.js",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.3",
+    "express": "^4.14.1",
+    "isomorphic-fetch": "^2.2.1",
+    "moment": "^2.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
