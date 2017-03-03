@@ -15,7 +15,7 @@ import api from '../utils/api'; export default class Header extends Component {
     if (hostname === 'localhost') {
       clientId = 'QNFMWHEOOBPYPRK1OWG3GBYEOQL4H1URCZ15TS2NSTCWOWMQ';
     } else {
-      clientId = 'RKQFRFZZNJIRTFOLECEUTE4VHKRPE0EIF2QGPJ0QFVXC3K3T';
+      clientId = 'ACLA5DJCSEPK4LLJYRZ33P3LWRQMGC0VVFFYKW412DUAGLFN';
     }
     const redirectUri = `${protocol}//${host}/oauth`
     return 'https://foursquare.com/oauth2/authenticate?'
