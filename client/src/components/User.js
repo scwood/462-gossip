@@ -17,7 +17,6 @@ export default class User extends Component {
   async componentDidMount() {
     this.setState({ isLoading: true });
     const user = await api.getUser(this.props.params.id)
-    console.log(user);
     this.setState({ isLoading: false, user });
   }
 

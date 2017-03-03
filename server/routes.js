@@ -4,59 +4,112 @@ const api = require('./api');
 const fs = require('fs');
 const db = require('./db.json');
 const moment = require('moment');
+const uuid = require('uuid/v1');
 const router = express.Router();
 
-router.get('/api/users', getUsers);
-router.get('/api/users/self', getSelf);
+router.get('/api/users/self', authenticate, getSelf);
+router.get('/api/users/count', getUsersCount);
 router.get('/api/users/logout', logout); 
-router.get('/api/users/:id', getUser);
 router.get('/api/users/:code/login', login);
+router.post('/api/users/:id/messages', postMessage);
+router.get('/api/users/:id/messages/next', getNextMessageSequence);
 
-function getUsers(req, res) {
-  res.send({
-    users: Object.keys(db.users).map(id => { 
-      return { id, name: db.users[id].name };
-    })
-  });
+// Start gossip code
+
+const n = 1000; // how often to propogate rumors
+
+function postMessage(req, res) {
+  const { body } = req;
+  if ('rumor' in body) {
+    handleRumor(body);
+  } else if ('want' in body) {
+    handleWant(body);
+  }
+  res.send({ success: true });
 }
 
-async function getUser(req, res) {
-  const { id } = req.params;
-  if (!(id in db.users)) {
-    res.status(404).send({ error: 'User not found' });
-    return;
+function handleRumor(message) {
+
+}
+
+function handleWant(message) {
+
+}
+
+function propogateRumor(user) {
+  return () => {
+    console.log(`${user.id} propogating rumors`)
   }
-  const user = db.users[id];
-  const checkins = await api.getUserCheckins(user.accessToken);
-  let result = { id: user.id, name: user.name };
-  if (checkins.items.length === 0) {
-    result.checkins = [];
-  } else if (req.cookies.user === id) {
-    result.checkins = checkins.items.map(formatCheckinDetailed);
-  } else {
-    const mostRecent = checkins.items[0]
-    result.checkins = [formatCheckinSimple(mostRecent)]
+}
+
+// End gossip code
+
+function flattenAndSortMessages(messages) {
+  return [];
+}
+
+function authenticate(req, res, next) {
+  const id = req.cookies.userId || null;
+  if (id !== null && id in db.users) {
+    req.user = db.users[id];
   }
-  res.send({ user: result });
+  next();
 }
 
 function getSelf(req, res) {
-  const self = req.cookies.user || null;
-  res.send({ self: db.users[self] });
+  const { user } = req;
+  if (!user) {
+    res.status(401).send({ error: 'Not logged in '});
+    return;
+  }
+  const messages = flattenAndSortMessages(user.messages);
+  res.send({ self: Object.assign({}, user, { messages }) });
 }
 
-async function login(req, res) {
-  const accessToken = await api.getAccessToken(req.params.code);
-  const user = await api.getUser(accessToken);
-  const result = { name: `${user.firstName} ${user.lastName}`, accessToken };
-  db.users[user.id] = result;
+function getNextMessageSequence(req, res) {
+  const { id } = req.params;
+  if (!(id in db.users)) {
+    res.status(404).send({ error: 'User id does not exist' });
+    return;
+  }
+  res.send({ nextMessageSequence: db.users[id].currentMessageSequence })
+}
+
+function getUsersCount(req, res) {
+  res.send({ usersCount: Object.keys(db.users).length });
+}
+
+async function login(req, res, next) {
+  let accessToken;
+  let user;
+  try {
+    accessToken = await api.getAccessToken(req.params.code);
+    user = await api.getUser(accessToken);
+  } catch (error) {
+    next(error);
+  }
+  let id;
+  if (user.id in db.registeredUsers) {
+    id = db.registeredUsers[user.id];
+  } else {
+    id = uuid();
+    db.registeredUsers[user.id] = id;
+    db.users[id] = {
+      id,
+      messages: {},
+      uri: `/api/users/${id}/messages`,
+      currentMessageSequence: 0
+    };
+    setInterval(propogateRumor(db.users[id]), n);
+  }
+  db.users[id].name = `${user.firstName} ${user.lastName}`;
   saveDb();
-  res.cookie('user', user.id, { maxAge: 9999999 });
+  res.cookie('userId', id, { maxAge: 9999999 });
   res.send({ success: true })
 }
 
 function logout(req, res) {
-  res.clearCookie('user');
+  res.clearCookie('userId');
   res.send({ success: true });
 }
 
@@ -66,19 +119,6 @@ function saveDb() {
       console.log(error);
     }
   });
-}
-
-function formatCheckinSimple(checkin) {
-  return { Where: checkin.venue.name };
-}
-
-function formatCheckinDetailed(checkin) {
-    console.log(checkin);
-  return {
-    Where: checkin.venue.name,
-    When: moment.unix(checkin.createdAt).format('MMMM Do YYYY, h:mm:ss a'),
-    Category: checkin.venue.categories[0].name,
-  };
 }
 
 module.exports = router;

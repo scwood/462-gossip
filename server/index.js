@@ -2,10 +2,12 @@ const express = require('express');
 const path = require('path');
 const router = require('./routes.js');
 const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 const publicPath = path.resolve(__dirname, '..', 'client', 'build');
 const app = express();
 
 app.use(cookieParser());
+app.use(bodyParser.json());
 app.use(express.static(publicPath));
 app.use(router);
 

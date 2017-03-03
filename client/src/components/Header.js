@@ -46,7 +46,7 @@ import api from '../utils/api'; export default class Header extends Component {
           <div className="level-left">
             <div className="level-item">
               <h1 className="title is-4">
-                Multi-Tenanted APIs and OAuth
+                Gossip Messenger
               </h1>
             </div>
           </div>

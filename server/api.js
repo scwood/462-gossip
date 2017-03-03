@@ -36,9 +36,10 @@ class Api {
   }
 
   async getUserCheckins(accessToken) {
-    const url = this.generateUrl('/users/self/checkins') + `&oauth_token=${accessToken}`;
+    const url = this.generateUrl('/users/self/checkins') +
+      `&oauth_token=${accessToken}`;
     const response = await this.fetchJson(url);
-      return response.response.checkins;
+    return response.response.checkins;
   }
 
   async fetchJson(...args) {
