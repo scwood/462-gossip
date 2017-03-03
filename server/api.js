@@ -4,12 +4,13 @@ class Api {
 
   constructor() {
     if (process.env.NODE_ENV === 'production') {
-      this.clientId = 'RKQFRFZZNJIRTFOLECEUTE4VHKRPE0EIF2QGPJ0QFVXC3K3T';
-      this.clientSecret = 'WKGTHNTQ5FJCPFOLMYDKWPTCJ4R0SZHKR1Z3RALORQ155WOA';
-      this.redirectUri = 'https://oauth.462.spncrwd.com/oauth';
+      this.clientId = 'ACLA5DJCSEPK4LLJYRZ33P3LWRQMGC0VVFFYKW412DUAGLFN';
+      this.clientSecret = 'FKHZL1FF0AELPLQI232VTDQ5TH125JRWQT4HQX0WJUD3V3HP';
+      this.redirectUri = 'https://gossip.462.spncrwd.com/oauth';
     } else {
       this.clientId = 'QNFMWHEOOBPYPRK1OWG3GBYEOQL4H1URCZ15TS2NSTCWOWMQ';
-      this.clientSecret = 'QMISANVAWNINSV0103OZJK2CV2HPEYLQAPDARQD2U23IVZWJ'; this.redirectUri = 'http://localhost:3000/oauth';
+      this.clientSecret = 'QMISANVAWNINSV0103OZJK2CV2HPEYLQAPDARQD2U23IVZWJ';
+      this.redirectUri = 'http://localhost:3000/oauth';
     }
     this.baseUrl = 'https://api.foursquare.com/v2';
   }

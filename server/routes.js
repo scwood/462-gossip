@@ -16,7 +16,17 @@ router.get('/api/users/:id/messages/next', getNextMessageSequence);
 
 // Start gossip code
 
-const n = 1000; // how often to propogate rumors
+const n = 1000; // how often to propogate rumors (in ms)
+
+Object.keys(db.users).forEach(key => {
+  setInterval(propogateRumor(db.users[key]), n);
+});
+
+function propogateRumor(user) {
+  return () => {
+    console.log(`${user.id} propogating rumors`)
+  }
+}
 
 function postMessage(req, res) {
   const { body } = req;
@@ -34,12 +44,6 @@ function handleRumor(message) {
 
 function handleWant(message) {
 
-}
-
-function propogateRumor(user) {
-  return () => {
-    console.log(`${user.id} propogating rumors`)
-  }
 }
 
 // End gossip code
