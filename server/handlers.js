@@ -5,6 +5,7 @@ const uuid = require('uuid/v1');
 const api = require('./utils/api');
 const db = require('./db.json')
 const saveDb = require('./utils/saveDb');
+
 let baseUrl;
 if (process.env.NODE_ENV === 'production') {
   baseUrl = 'https://gossip.462.spncrwd.com';
@@ -14,7 +15,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const n = 1000; // how often to propogate rumors (in ms)
 
-
+// kick off nodes rumor propogation processes
 Object.keys(db.users).forEach(key => {
   setInterval(propogateRumor(db.users[key]), n);
 });
@@ -31,6 +32,9 @@ function propogateRumor(user) {
 }
 
 function sendMessage(user, peerId) {
+  if (!(peerId in user.neighbors)) {
+    user.neighbors[peerId] = {};
+  }
   if (_.random(1)) {
     sendRumor(user, peerId);
   } else {
@@ -38,7 +42,20 @@ function sendMessage(user, peerId) {
   }
 }
 
-function sendWant(user, peerId) {
+async function sendWant(user, peerId) {
+  const messageIds = Object.keys(user.messages);
+  const message = {};
+  messageIds.forEach(messageId => {
+    message[messageId] = Object.keys(user.messages[messageId]).length - 1;
+  });
+  await fetch(baseUrl + db.users[peerId].uri, {
+    method: 'post',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      want: message,
+      endPoint: baseUrl + user.uri
+    })
+  });
 }
 
 async function sendRumor(user, peerId) {
@@ -105,7 +122,9 @@ function handleRumor(user, message) {
 }
 
 function handleWant(user, message) {
-
+  const match = /.*\/(.*)\/messages$/.exec(message.endPoint);
+  const peerId = match[1];
+  sendMessage(user, peerId);
 }
 
 // End gossip code

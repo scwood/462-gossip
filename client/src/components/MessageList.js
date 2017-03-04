@@ -67,6 +67,9 @@ export default class MessageList extends Component {
         <h1 className="title">Messages</h1>
         <hr />
         {error && <Error onDismiss={this.handleErrorDismiss}>{error}</Error>}
+        (May need to refresh a few times before seeing messages after initial login)
+        <br />
+        <br />
         {content}
       </div>
     );
