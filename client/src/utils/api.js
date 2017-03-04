@@ -18,6 +18,7 @@ class Api {
       rumor: {
         messageId: `${user.id}:${nextMessageSequence}`,
         originator: user.name,
+        date: new Date().toJSON(),
         text,
       },
       endPoint: this.deriveUrl(user.uri)

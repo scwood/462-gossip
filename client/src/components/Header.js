@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 
-import api from '../utils/api'; export default class Header extends Component {
+import api from '../utils/api';
+
+export default class Header extends Component {
 
   constructor() {
     super();
