@@ -44,15 +44,21 @@ function sendMessage(user, peerId) {
 
 async function sendWant(user, peerId) {
   const messageIds = Object.keys(user.messages);
-  const message = {};
+  const seenMessages = {};
   messageIds.forEach(messageId => {
-    message[messageId] = Object.keys(user.messages[messageId]).length - 1;
+    const sequences = Object.keys(user.messages[messageId]).sort();
+    const lastIndex = sequences.length - 1;
+    if (lastIndex > sequences[lastIndex]) {
+      seenMessages[messageId] = 0;
+    } else {
+      seenMessages[messageId] = sequences.length - 1;
+    }
   });
   await fetch(baseUrl + db.users[peerId].uri, {
     method: 'post',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      want: message,
+      want: seenMessages,
       endPoint: baseUrl + user.uri
     })
   });
@@ -117,13 +123,20 @@ function handleRumor(user, message) {
   if (!(id in user.messages)) {
     user.messages[id] = {};
   }
-  user.messages[id][sequence] = message.rumor;
+  user.messages[id][parseInt(sequence)] = message.rumor;
   saveDb();
 }
 
 function handleWant(user, message) {
   const match = /.*\/(.*)\/messages$/.exec(message.endPoint);
   const peerId = match[1];
+  if (!(peerId in user.neighbors)) {
+    user.neighbors[peerId] = {}
+  }
+  Object.keys(message.want).forEach(messageId => {
+    user.neighbors[peerId][messageId] = message.want[messageId];
+  });
+  saveDb();
   sendMessage(user, peerId);
 }
 
